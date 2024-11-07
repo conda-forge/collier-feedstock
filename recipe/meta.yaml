@@ -43,7 +43,7 @@ test:
     - cd source/demos
     - $FC demo.f90 -o demo -I$PREFIX/include -lcollier
     - $FC democache.f90 -o democache -I$PREFIX/include -lcollier
-    - ./democache
+    - ./democache  # [build_platform == target_platform]
 
 about:
   home: https://collier.hepforge.org/
