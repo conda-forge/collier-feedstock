@@ -37,7 +37,7 @@ test:
   commands:
     - test -f $PREFIX/lib/cmake/collierConfig.cmake
     - test -f $PREFIX/lib/cmake/collierConfigVersion.cmake
-    - test -f $PREFIX/lib/libcollier.so
+    - test -f $PREFIX/lib/libcollier${SHLIB_EXT}
     - test -f $PREFIX/include/collier.mod
 
     - cd source/demos
