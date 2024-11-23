@@ -12,10 +12,15 @@ source:
 
 build:
   skip: true  # [win]
-  number: 2
+  number: 3
   run_exports:
     - {{ pin_subpackage('collier', max_pin='x.x') }}
+  ignore_run_exports_from:
+    - {{ compiler('cxx') }}
+    - sed
   script:
+    # Use modern CMake by using range of compatible versions
+    - sed -i 's/cmake_minimum_required (VERSION 2.8.7)/cmake_minimum_required(VERSION 3.15...3.31)/g' source/CMakeLists.txt
     - cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
     - cmake -LH build
     - cmake --build build --clean-first --parallel="${CPU_COUNT}"
@@ -28,6 +33,7 @@ requirements:
     - {{ compiler('fortran') }}
     - cmake
     - make
+    - sed
 
 test:
   source_files:
@@ -41,8 +47,11 @@ test:
     - test -f $PREFIX/include/collier.mod
 
     - cd source/demos
-    - $FC demo.f90 -o demo -I$PREFIX/include -lcollier
-    - $FC democache.f90 -o democache -I$PREFIX/include -lcollier
+    # The addition of -I$PREFIX/include is only needed on osx, but for
+    # simplicity add it for all.
+    # demo executable requires user keyboard input, so skip after build.
+    - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier
+    - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier
     - ./democache  # [build_platform == target_platform]
 
 about:
