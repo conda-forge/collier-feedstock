@@ -12,9 +12,11 @@ source:
 
 build:
   skip: true  # [win]
-  number: 2
+  number: 3
   run_exports:
     - {{ pin_subpackage('collier', max_pin='x.x') }}
+  ignore_run_exports_from:
+    - {{ compiler('cxx') }}
   script:
     - cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
     - cmake -LH build
@@ -41,8 +43,8 @@ test:
     - test -f $PREFIX/include/collier.mod
 
     - cd source/demos
-    - $FC demo.f90 -o demo -I$PREFIX/include -lcollier
-    - $FC democache.f90 -o democache -I$PREFIX/include -lcollier
+    - $FC demo.f90 -o demo $FFLAGS -lcollier
+    - $FC democache.f90 -o democache $FFLAGS -lcollier
     - ./democache  # [build_platform == target_platform]
 
 about:
