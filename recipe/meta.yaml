@@ -43,8 +43,10 @@ test:
     - test -f $PREFIX/include/collier.mod
 
     - cd source/demos
-    - $FC demo.f90 -o demo $FFLAGS -lcollier
-    - $FC democache.f90 -o democache $FFLAGS -lcollier
+    - $FC demo.f90 -o demo $FFLAGS -lcollier  # [not (osx and x86)]
+    - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier  # [osx and x86]
+    - $FC democache.f90 -o democache $FFLAGS -lcollier  # [not (osx and x86)]
+    - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier  # [osx and x86]
     - ./democache  # [build_platform == target_platform]
 
 about:
