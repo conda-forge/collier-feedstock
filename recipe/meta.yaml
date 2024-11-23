@@ -17,7 +17,10 @@ build:
     - {{ pin_subpackage('collier', max_pin='x.x') }}
   ignore_run_exports_from:
     - {{ compiler('cxx') }}
+    - sed
   script:
+    # Use modern CMake by using range of compatible versions
+    - sed -i 's/cmake_minimum_required (VERSION 2.8.7)/cmake_minimum_required(VERSION 3.15...3.31)/g' source/CMakeLists.txt
     - cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
     - cmake -LH build
     - cmake --build build --clean-first --parallel="${CPU_COUNT}"
@@ -30,6 +33,7 @@ requirements:
     - {{ compiler('fortran') }}
     - cmake
     - make
+    - sed
 
 test:
   source_files:
