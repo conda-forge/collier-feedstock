@@ -44,7 +44,8 @@ test:
 
     - cd source/demos
     # The addition of -I$PREFIX/include is only needed on osx, but for
-    # simplicity add it for all
+    # simplicity add it for all.
+    # demo executable requires user keyboard input, so skip after build.
     - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier
     - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier
     - ./democache  # [build_platform == target_platform]
