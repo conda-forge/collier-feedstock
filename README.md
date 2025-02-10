@@ -98,6 +98,7 @@ Current release info
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-collier-green.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-collier--static-green.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) |
 
 Installing collier
 ==================
@@ -109,16 +110,16 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 ```
 
-Once the `conda-forge` channel has been enabled, `collier` can be installed with `conda`:
+Once the `conda-forge` channel has been enabled, `collier, collier-static` can be installed with `conda`:
 
 ```
-conda install collier
+conda install collier collier-static
 ```
 
 or with `mamba`:
 
 ```
-mamba install collier
+mamba install collier collier-static
 ```
 
 It is possible to list all of the versions of `collier` available on your platform with `conda`:
