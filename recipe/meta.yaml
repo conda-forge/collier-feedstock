@@ -2,7 +2,9 @@
 {% set version = "1.2.8" %}
 
 package:
-  name: {{ name }}
+  # Have top level name be unique from any outputs
+  # c.f. https://github.com/conda-forge/conda-forge.github.io/blob/abfc33db28c35e9a8f6b719d0021768f0d5d06be/docs/maintainer/knowledge_base.md?plain=1#L1749
+  name: {{ name }}-split
   version: {{ version }}
 
 source:
@@ -11,48 +13,98 @@ source:
   folder: source
 
 build:
-  skip: true  # [win]
-  number: 4
-  run_exports:
-    - {{ pin_subpackage('collier', max_pin='x.x') }}
-  ignore_run_exports_from:
-    - {{ compiler('cxx') }}
-    - sed
-  script:
-    # Use modern CMake by using range of compatible versions
-    - sed -i 's/cmake_minimum_required (VERSION 2.8.7)/cmake_minimum_required(VERSION 3.15...3.31)/g' source/CMakeLists.txt
-    - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
-    - cmake -LH build
-    - cmake --build build --clean-first --parallel="${CPU_COUNT}"
-    - cmake --install build
+  number: 5
 
-requirements:
-  build:
-    - {{ stdlib('c') }}
-    - {{ compiler('cxx') }}  # Not used, but needed for CMake to not error
-    - {{ compiler('fortran') }}
-    - cmake
-    - make
-    - sed
+outputs:
+  - name: {{ name }}
 
-test:
-  source_files:
-    - source/demos
-  requires:
-    - {{ compiler('fortran') }}
-  commands:
-    - test -f $PREFIX/lib/cmake/collierConfig.cmake
-    - test -f $PREFIX/lib/cmake/collierConfigVersion.cmake
-    - test -f $PREFIX/lib/libcollier${SHLIB_EXT}
-    - test -f $PREFIX/include/collier.mod
+    build:
+      skip: true  # [win]
+      run_exports:
+        - {{ pin_subpackage('collier', max_pin='x.x') }}
+      ignore_run_exports_from:
+        - {{ compiler('cxx') }}
+        - sed
+      script:
+        # Use modern CMake by using range of compatible versions
+        - sed -i 's/cmake_minimum_required (VERSION 2.8.7)/cmake_minimum_required(VERSION 3.15...3.31)/g' source/CMakeLists.txt
+        - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
+        - cmake -LH build
+        - cmake --build build --clean-first --parallel="${CPU_COUNT}"
+        - cmake --install build
 
-    - cd source/demos
-    # The addition of -I$PREFIX/include is only needed on osx, but for
-    # simplicity add it for all.
-    # demo executable requires user keyboard input, so skip after build.
-    - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier
-    - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier
-    - ./democache  # [build_platform == target_platform]
+    requirements:
+      build:
+        - {{ stdlib('c') }}
+        - {{ compiler('cxx') }}  # Not used, but needed for CMake to not error
+        - {{ compiler('fortran') }}
+        - cmake
+        - make
+        - sed
+
+    test:
+      source_files:
+        - source/demos
+      requires:
+        - {{ compiler('fortran') }}
+      commands:
+        - test -f $PREFIX/lib/cmake/collierConfig.cmake
+        - test -f $PREFIX/lib/cmake/collierConfigVersion.cmake
+        - test -f $PREFIX/lib/libcollier${SHLIB_EXT}
+        - test ! -f $PREFIX/lib/libcollier.a
+        - test -f $PREFIX/include/collier.mod
+
+        - cd source/demos
+        # The addition of -I$PREFIX/include is only needed on osx, but for
+        # simplicity add it for all.
+        # demo executable requires user keyboard input, so skip after build.
+        - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier
+        - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier
+        - ./democache  # [build_platform == target_platform]
+
+  - name: {{ name }}-static
+
+    build:
+      skip: true  # [win]
+      ignore_run_exports_from:
+        - {{ compiler('cxx') }}
+        - sed
+      script:
+        # Use modern CMake by using range of compatible versions
+        - sed -i 's/cmake_minimum_required (VERSION 2.8.7)/cmake_minimum_required(VERSION 3.15...3.31)/g' source/CMakeLists.txt
+        - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -Dstatic=ON -DCMAKE_Fortran_COMPILER=$FC -S source -B build
+        - cmake -LH build
+        - cmake --build build --clean-first --parallel="${CPU_COUNT}"
+        - cmake --install build
+
+    requirements:
+      build:
+        - {{ stdlib('c') }}
+        - {{ compiler('cxx') }}  # Not used, but needed for CMake to not error
+        - {{ compiler('fortran') }}
+        - cmake
+        - make
+        - sed
+
+    test:
+      source_files:
+        - source/demos
+      requires:
+        - {{ compiler('fortran') }}
+      commands:
+        - test -f $PREFIX/lib/cmake/collierConfig.cmake
+        - test -f $PREFIX/lib/cmake/collierConfigVersion.cmake
+        - test -f $PREFIX/lib/libcollier.a
+        - test ! -f $PREFIX/lib/libcollier${SHLIB_EXT}
+        - test -f $PREFIX/include/collier.mod
+
+        - cd source/demos
+        # The addition of -I$PREFIX/include is only needed on osx, but for
+        # simplicity add it for all.
+        # demo executable requires user keyboard input, so skip after build.
+        - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include -lcollier
+        - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include -lcollier
+        - ./democache  # [build_platform == target_platform]
 
 about:
   home: https://collier.hepforge.org/
@@ -83,6 +135,7 @@ about:
   doc_url: https://collier.hepforge.org/documentation.html
 
 extra:
+  feedstock-name: collier
   recipe-maintainers:
     - matthewfeickert
     - ansgardenner
