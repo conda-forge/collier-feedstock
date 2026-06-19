@@ -17,26 +17,32 @@ quantum field theory with the following features:
 * scalar and tensor integrals for high particle multiplicities
 * dimensional regularization for ultraviolet divergences
 * dimensional regularization for soft infrared divergences (mass
-  regularization for abelian soft divergences is supported as well)
+regularization for abelian soft divergences is supported as well)
 * dimensional regularization or mass regularization for collinear mass
-  singularities
+singularities
 * complex internal masses (for unstable particles) fully supported
-  (external momenta and virtualities are expected to be real)
+(external momenta and virtualities are expected to be real)
 * numerically dangerous regions (small Gram or other kinematical
-  determinants) cured by dedicated expansions
+determinants) cured by dedicated expansions
 * two independent implementations of all basic building blocks allow
-  for internal cross-checks
+for internal cross-checks
 * cache system to speed up calculations
 
 If you use Collier for a publication, please cite all the references
 listed [here](https://collier.hepforge.org/documentation.html).
 
-
 Current build status
 ====================
 
 
-<table>
+<table><tr>
+    <td>GitHub Actions</td>
+    <td>
+      <a href="https://github.com/conda-forge/collier-feedstock/actions/workflows/conda-build.yml">
+        <img src="https://github.com/conda-forge/collier-feedstock/actions/workflows/conda-build.yml/badge.svg?event=push&branch=main">
+      </a>
+    </td>
+  </tr>
     
   <tr>
     <td>Azure</td>
@@ -50,27 +56,6 @@ Current build status
         <table>
           <thead><tr><th>Variant</th><th>Status</th></tr></thead>
           <tbody><tr>
-              <td>linux_64</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23871&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/collier-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_64_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_aarch64</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23871&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/collier-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_ppc64le</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23871&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/collier-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_ppc64le_" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
               <td>osx_64</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23871&branchName=main">
@@ -98,6 +83,7 @@ Current release info
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-collier-green.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/collier.svg)](https://anaconda.org/conda-forge/collier) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-collier--devel-green.svg)](https://anaconda.org/conda-forge/collier-devel) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/collier-devel.svg)](https://anaconda.org/conda-forge/collier-devel) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/collier-devel.svg)](https://anaconda.org/conda-forge/collier-devel) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/collier-devel.svg)](https://anaconda.org/conda-forge/collier-devel) |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-collier--static-green.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/collier-static.svg)](https://anaconda.org/conda-forge/collier-static) |
 
 Installing collier
@@ -110,16 +96,16 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 ```
 
-Once the `conda-forge` channel has been enabled, `collier, collier-static` can be installed with `conda`:
+Once the `conda-forge` channel has been enabled, `collier, collier-devel, collier-static` can be installed with `conda`:
 
 ```
-conda install collier collier-static
+conda install collier collier-devel collier-static
 ```
 
 or with `mamba`:
 
 ```
-mamba install collier collier-static
+mamba install collier collier-devel collier-static
 ```
 
 It is possible to list all of the versions of `collier` available on your platform with `conda`:
