@@ -1,7 +1,7 @@
 schema_version: 1
 
 context:
-  version: "1.2.9"
+  version: "1.2.10"
 
 recipe:
   # Have top level name be unique from any outputs
@@ -11,11 +11,11 @@ recipe:
 
 source:
   url: https://collier.hepforge.org/downloads/?f=collier-${{ version }}.tar.gz
-  sha256: 98d14f638d6dda826303f24720715af8c23f1185ddaffd46533c61a92a7fcb54
+  sha256: 460624ea709211506b642343a7f6be41d3883ccb52598b14950f8e07c0262713
   target_directory: source
 
 build:
-  number: 1
+  number: 0
   skip:
     - win
 
