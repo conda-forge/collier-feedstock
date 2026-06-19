@@ -1,0 +1,206 @@
+schema_version: 1
+
+context:
+  version: "1.2.9"
+
+recipe:
+  # Have top level name be unique from any outputs
+  # c.f. https://github.com/conda-forge/conda-forge.github.io/blob/abfc33db28c35e9a8f6b719d0021768f0d5d06be/docs/maintainer/knowledge_base.md?plain=1#L1749
+  name: collier-split
+  version: ${{ version }}
+
+source:
+  url: https://collier.hepforge.org/downloads/?f=collier-${{ version }}.tar.gz
+  sha256: 98d14f638d6dda826303f24720715af8c23f1185ddaffd46533c61a92a7fcb54
+  target_directory: source
+
+build:
+  number: 1
+  skip:
+    - win
+
+outputs:
+  # c.f. https://rattler-build.prefix.dev/latest/multiple_output_cache/
+  - staging:
+      name: collier-build
+    build:
+      script:
+        # Use modern CMake by using range of compatible versions
+        - sed -i 's/cmake_minimum_required (VERSION 3.5...4.0)/cmake_minimum_required(VERSION 3.15...4.3)/g' source/CMakeLists.txt
+        - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_Fortran_COMPILER=$FC -S source -B build
+        - cmake -LH build
+        - cmake --build build --clean-first --parallel="${CPU_COUNT}"
+        - cmake --install build
+        # Stage for collier-devel for downstream software to build against
+        # COLLIER's internal modules
+        - mkdir -p $PREFIX/include/collier
+        - cp source/modules/*.mod $PREFIX/include/collier/
+
+    requirements:
+      build:
+        - ${{ stdlib("c") }}
+        - ${{ compiler("cxx") }}  # Not used, but needed for CMake to not error
+        - ${{ compiler("fortran") }}
+        - cmake
+        - make
+        - sed
+      ignore_run_exports:
+        from_package:
+          - ${{ compiler("cxx") }}
+          - sed
+
+  - package:
+      name: collier
+    inherit: collier-build
+
+    build:
+      files:
+        - lib/libcollier.*
+        - lib/cmake/collierConfig.cmake
+        - lib/cmake/collierConfigVersion.cmake
+        - include/collier.mod
+    requirements:
+      run_exports:
+        - ${{ pin_subpackage("collier", upper_bound="x.x") }}
+
+    tests:
+      - package_contents:
+          strict: true
+          lib:
+            - collier
+          include:
+            - collier.mod
+          files:
+            - lib/cmake/collierConfig.cmake
+            - lib/cmake/collierConfigVersion.cmake
+            - etc/conda/test-files/collier/0/*
+
+      - files:
+          source:
+            - source/demos
+        requirements:
+          run:
+            - ${{ compiler("fortran") }}
+        script:
+          - cd source/demos
+          # The addition of -I$PREFIX/include is only needed on osx, but for
+          # simplicity add it for all.
+          # demo executable requires user keyboard input, so skip after build.
+          - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include $LDFLAGS -lcollier
+          - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include $LDFLAGS -lcollier
+          - if: build_platform == target_platform
+            then: ./democache
+
+  - package:
+      name: collier-devel
+    inherit:
+      from: collier-build
+      run_exports: false
+
+    build:
+      files:
+        - include/collier/**
+    requirements:
+      run:
+        - ${{ pin_subpackage("collier", exact=true) }}
+
+    tests:
+      - package_contents:
+          strict: true
+          include:
+            - collier/*.mod
+
+      - requirements:
+          run:
+            - ${{ compiler("fortran") }}
+        script:
+          # The exposed internal modules must be usable for compilation.
+          - printf 'program test_modules\n  use collier_coefs\n  use collier_init\nend program test_modules\n' > test_modules.f90
+          - $FC test_modules.f90 -o test_modules $FFLAGS -I$PREFIX/include/collier $LDFLAGS -lcollier
+          - ./test_modules
+
+  - package:
+      name: collier-static
+    build:
+      script:
+        # Use modern CMake by using range of compatible versions
+        - sed -i 's/cmake_minimum_required (VERSION 3.5...4.0)/cmake_minimum_required(VERSION 3.15...4.3)/g' source/CMakeLists.txt
+        - cmake ${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=$PREFIX -Dstatic=ON -DCMAKE_Fortran_COMPILER=$FC -S source -B build
+        - cmake -LH build
+        - cmake --build build --clean-first --parallel="${CPU_COUNT}"
+        - cmake --install build
+
+    requirements:
+      build:
+        - ${{ stdlib("c") }}
+        - ${{ compiler("cxx") }}  # Not used, but needed for CMake to not error
+        - ${{ compiler("fortran") }}
+        - cmake
+        - make
+        - sed
+      ignore_run_exports:
+        from_package:
+          - ${{ compiler("cxx") }}
+          - sed
+
+    tests:
+      - package_contents:
+          strict: true
+          lib:
+            - libcollier.a
+          include:
+            - collier.mod
+          files:
+            - lib/cmake/collierConfig.cmake
+            - lib/cmake/collierConfigVersion.cmake
+            - etc/conda/test-files/collier-static/0/*
+
+      - files:
+          source:
+            - source/demos
+        requirements:
+          run:
+            - ${{ compiler("fortran") }}
+        script:
+          - cd source/demos
+          # The addition of -I$PREFIX/include is only needed on osx, but for
+          # simplicity add it for all.
+          # demo executable requires user keyboard input, so skip after build.
+          - $FC demo.f90 -o demo $FFLAGS -I$PREFIX/include $LDFLAGS -lcollier
+          - $FC democache.f90 -o democache $FFLAGS -I$PREFIX/include $LDFLAGS -lcollier
+          - if: build_platform == target_platform
+            then: ./democache
+
+about:
+  summary: "COLLIER: A Complex One-Loop LIbrary with Extended Regularizations"
+  description: |
+    COLLIER is a fortran library for the numerical evaluation of one-loop
+    scalar and tensor integrals appearing in perturbative relativistic
+    quantum field theory with the following features:
+    * scalar and tensor integrals for high particle multiplicities
+    * dimensional regularization for ultraviolet divergences
+    * dimensional regularization for soft infrared divergences (mass
+    regularization for abelian soft divergences is supported as well)
+    * dimensional regularization or mass regularization for collinear mass
+    singularities
+    * complex internal masses (for unstable particles) fully supported
+    (external momenta and virtualities are expected to be real)
+    * numerically dangerous regions (small Gram or other kinematical
+    determinants) cured by dedicated expansions
+    * two independent implementations of all basic building blocks allow
+    for internal cross-checks
+    * cache system to speed up calculations
+
+    If you use Collier for a publication, please cite all the references
+    listed [here](https://collier.hepforge.org/documentation.html).
+  license: GPL-3.0-only
+  license_file: source/COPYING
+  homepage: https://collier.hepforge.org/
+  documentation: https://collier.hepforge.org/documentation.html
+
+extra:
+  feedstock-name: collier
+  recipe-maintainers:
+    - matthewfeickert
+    - ansgardenner
+    - dittmaier
